@@ -117,10 +117,12 @@ Deno.serve(async (req) => {
         y = tableY + 10;
 
         const maxRows = 8;
+        const entryCount = Math.max(entries.length, maxRows);
 
-        for (let i = 0; i < Math.max(entries.length, maxRows); i++) {
+        for (let i = 0; i < entryCount; i++) {
             const entry = entries[i] || {};
             
+            // Safety check for page bottom (297mm is standard A4 height)
             if (y > 260) {
                 doc.addPage();
                 y = 20;
@@ -128,16 +130,22 @@ Deno.serve(async (req) => {
 
             doc.setFontSize(7);
             
-            // Convert time to 12-hour format
+            // 1. Format Time (12-hour format)
             let displayTime = '';
             if (entry.time) {
-                const [hours, minutes] = entry.time.split(':');
-                const hour = parseInt(hours);
-                const ampm = hour >= 12 ? 'PM' : 'AM';
-                const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-                displayTime = `${hour12}:${minutes} ${ampm}`;
+                const timeStr = String(entry.time);
+                if (timeStr.includes(':')) {
+                    const [hours, minutes] = timeStr.split(':');
+                    const hour = parseInt(hours);
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const hour12 = hour % 12 || 12;
+                    displayTime = `${hour12}:${minutes} ${ampm}`;
+                } else {
+                    displayTime = timeStr; // Fallback if format is unexpected
+                }
             }
             
+            // Map the record data to the columns
             const values = [
                 displayTime,
                 entry.temp_wind_speed_dir || '',
@@ -149,47 +157,55 @@ Deno.serve(async (req) => {
                 entry.notes_action_taken || ''
             ];
             
-            // Calculate dynamic row height based on content
-            doc.setFontSize(7);
-            let maxLines = 1;
+            // 2. PRE-CALCULATE WRAPPING & ROW HEIGHT
+            // This is the "brain" that prevents overflow
+            let maxLinesInRow = 1;
+            const padding = 4; // Total horizontal padding (2 left, 2 right)
+            
             const wrappedCells = values.map((val, idx) => {
-                if (!val) return [];
                 const text = String(val);
-                const width = colWidths[idx] - 4;
-                const lines = doc.splitTextToSize(text, width);
-                maxLines = Math.max(maxLines, lines.length);
+                const cellWidth = colWidths[idx] - padding;
+                const lines = doc.splitTextToSize(text, cellWidth);
+                maxLinesInRow = Math.max(maxLinesInRow, lines.length);
                 return lines;
             });
             
-            const lineHeight = 4.5;
-            const rowHeight = Math.max(14, maxLines * lineHeight + 7);
+            const lineHeight = 3.5; // Standard height for size 7 font
+            const minRowHeight = 12; // Minimum box height
+            const calculatedHeight = (maxLinesInRow * lineHeight) + 6; // text height + vertical padding
+            const rowHeight = Math.max(minRowHeight, calculatedHeight);
             
-            // Draw row rectangle
+            // 3. DRAW THE ROW BOX
             doc.rect(tableX, y, tableWidth, rowHeight);
             
-            // Draw content and vertical lines
+            // 4. DRAW CONTENT & VERTICAL DIVIDERS
             let cellX = tableX;
             
             for (let idx = 0; idx < colWidths.length; idx++) {
-                // Draw vertical line
+                // Draw the vertical line for this cell
                 doc.line(cellX, y, cellX, y + rowHeight);
                 
-                // Draw text content
                 const lines = wrappedCells[idx];
                 if (lines && lines.length > 0) {
-                    let textY = y + 5;
+                    // Calculate starting Y to center text vertically within the box
+                    const totalTextHeight = lines.length * lineHeight;
+                    let textY = y + ((rowHeight - totalTextHeight) / 2) + 2.5; 
+
                     for (const line of lines) {
-                        doc.text(line, cellX + 2, textY);
-                        textY += lineHeight;
+                        // Final boundary check: don't print if it would touch the bottom line
+                        if (textY < (y + rowHeight - 1)) {
+                            doc.text(line, cellX + 2, textY);
+                            textY += lineHeight;
+                        }
                     }
                 }
-                
                 cellX += colWidths[idx];
             }
             
-            // Draw final vertical line
-            doc.line(cellX, y, cellX, y + rowHeight);
+            // Draw the closing vertical line on the far right
+            doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
             
+            // Move Y pointer to the start of the next row
             y += rowHeight;
         }
 
