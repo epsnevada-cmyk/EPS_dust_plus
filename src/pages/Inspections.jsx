@@ -92,7 +92,7 @@ export default function Inspections() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="w-4 h-4 text-[var(--brand)] shrink-0" />
+                      <FileText className="w-4 h-4 text-black shrink-0" />
                       <h3 className="font-semibold text-stone-900 truncate">{inspection.project_name || "Unnamed"}</h3>
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs text-stone-500">
