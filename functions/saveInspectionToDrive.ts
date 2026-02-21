@@ -96,7 +96,8 @@ Deno.serve(async (req) => {
         const headers = ['Time', 'Temp, Wind Speed & Dir.', 'Soil Condition', 'Dust Emissions', 'Trackout on Street', 'Curbs & Sidewalks', 'Trackout Control Device Effective', 'Notes, Action Taken'];
         
         headers.forEach((header, i) => {
-            doc.text(header, xPos + colWidths[i] / 2, tableY + 6, { maxWidth: colWidths[i] - 4, align: 'center' });
+            const centerX = xPos + colWidths[i] / 2;
+            doc.text(header, centerX, tableY + 5.5, { maxWidth: colWidths[i] - 2, align: 'center' });
             xPos += colWidths[i];
         });
 
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
             
             values.forEach((val, idx) => {
                 if (val) {
-                    doc.text(val, xPos, y + 7, { maxWidth: colWidths[idx] - 3 });
+                    doc.text(val, xPos + 1, y + 7, { maxWidth: colWidths[idx] - 4 });
                 }
                 // Draw vertical lines
                 doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
