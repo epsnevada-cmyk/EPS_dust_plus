@@ -154,7 +154,9 @@ Deno.serve(async (req) => {
             
             values.forEach((val, idx) => {
                 if (val) {
-                    doc.text(val, xPos + 1, y + 7, { maxWidth: colWidths[idx] - 4 });
+                    // Split text to fit within column width
+                    const textLines = doc.splitTextToSize(val, colWidths[idx] - 3);
+                    doc.text(textLines, xPos + 1.5, y + 7, { maxWidth: colWidths[idx] - 3 });
                 }
                 // Draw vertical lines
                 doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
