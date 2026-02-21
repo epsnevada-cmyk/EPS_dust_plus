@@ -150,39 +150,45 @@ Deno.serve(async (req) => {
             ];
             
             // Calculate dynamic row height based on content
+            doc.setFontSize(7);
             let maxLines = 1;
             const wrappedCells = values.map((val, idx) => {
                 if (!val) return [];
-                const text = val.toString();
-                const lines = doc.splitTextToSize(text, colWidths[idx] - 4);
+                const text = String(val);
+                const width = colWidths[idx] - 4;
+                const lines = doc.splitTextToSize(text, width);
                 maxLines = Math.max(maxLines, lines.length);
                 return lines;
             });
             
-            const lineHeight = 4;
-            const rowHeight = Math.max(12, maxLines * lineHeight + 6);
+            const lineHeight = 4.5;
+            const rowHeight = Math.max(14, maxLines * lineHeight + 7);
             
-            // Draw row borders
+            // Draw row rectangle
             doc.rect(tableX, y, tableWidth, rowHeight);
             
-            // Draw cell content
-            xPos = tableX;
+            // Draw content and vertical lines
+            let cellX = tableX;
             
-            wrappedCells.forEach((lines, idx) => {
-                // Draw vertical lines first
-                doc.line(xPos, y, xPos, y + rowHeight);
+            for (let idx = 0; idx < colWidths.length; idx++) {
+                // Draw vertical line
+                doc.line(cellX, y, cellX, y + rowHeight);
                 
-                if (lines.length > 0) {
-                    let lineY = y + 4;
-                    lines.forEach((line) => {
-                        doc.text(line, xPos + 2, lineY);
-                        lineY += lineHeight;
-                    });
+                // Draw text content
+                const lines = wrappedCells[idx];
+                if (lines && lines.length > 0) {
+                    let textY = y + 5;
+                    for (const line of lines) {
+                        doc.text(line, cellX + 2, textY);
+                        textY += lineHeight;
+                    }
                 }
                 
-                xPos += colWidths[idx];
-            });
-            doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
+                cellX += colWidths[idx];
+            }
+            
+            // Draw final vertical line
+            doc.line(cellX, y, cellX, y + rowHeight);
             
             y += rowHeight;
         }
