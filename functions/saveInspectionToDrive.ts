@@ -69,83 +69,73 @@ Deno.serve(async (req) => {
 
         y += 10;
         doc.setFontSize(9);
-        doc.text('Record daily inspection results and corrective measures for dust control below:', leftCol, y);
 
         y += 8;
-        doc.text(`Daily:   Dust Sign Posted: ${inspection.dust_sign_posted || '______'}`, leftCol, y);
-        doc.text(`Dust Permit Onsite: ${inspection.dust_permit_on_site || '______'}`, leftCol + 65, y);
-        doc.text(`Soil Import/Export Trucks Running: ${inspection.soil_import_export_trucks_running || '____'}`, leftCol + 120, y);
+        doc.text('Record daily inspection results and corrective measures for dust control below:', leftCol, y);
 
-        // Table - matching original form structure
+        // --- SUMMARY BOX (Permit & Truck Info) ---
         y += 10;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+
+        // Draw a subtle border box for the summary
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(15, y, 180, 25);
+
+        // Fill data from the inspection record
+        doc.text(`Dust Permit Onsite: ${inspection.dust_permit_on_site || 'No'}`, 20, y + 8);
+        doc.text(`Dust Sign Posted: ${inspection.dust_sign_posted || 'Yes'}`, 20, y + 16);
+        doc.text(`Soil Import/Export Trucks Running: ${inspection.soil_import_export_trucks_running || '0'}`, 100, y + 8);
+        doc.text(`Project: ${inspection.project_name || 'N/A'}`, 100, y + 16);
+
+        y += 35; // Move Y down to start the table
         
-        // Draw table border
+        // --- TABLE CONFIGURATION ---
+        const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
+        const tableWidth = colWidths.reduce((a, b) => a + b, 0);
         const tableX = 15;
-        const tableY = y;
-        const tableWidth = 180;
-        
-        // Table headers with borders
-        doc.setFillColor(245, 245, 245);
-        doc.rect(tableX, tableY, tableWidth, 10, 'FD');
-        
+
+        // --- DRAW HEADERS ---
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
-        
-        const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
-        let xPos = tableX;
+        const headers = ["Time", "Temp/Wind", "Soil Cond.", "Dust Emis.", "Trackout", "Curbs/Swalk", "Control Eff.", "Notes/Action"];
 
-        const headers = ['Time', 'Temp, Wind Speed & Dir.', 'Soil Condition', 'Dust Emissions', 'Trackout on Street', 'Curbs & Sidewalks', 'Trackout Control Device Effective', 'Notes, Action Taken'];
+        let headX = tableX;
+        let headHeight = 10;
 
-        headers.forEach((header, i) => {
-            const wrappedText = doc.splitTextToSize(header, colWidths[i] - 2);
-            const centerX = xPos + colWidths[i] / 2;
-            const startY = tableY + 3 + (wrappedText.length === 1 ? 2.5 : 1);
-            doc.text(wrappedText, centerX, startY, { align: 'center' });
-            xPos += colWidths[i];
-        });
+        doc.setFillColor(240, 240, 240); // Grey header background
+        doc.rect(tableX, y, tableWidth, headHeight, 'F');
+        doc.rect(tableX, y, tableWidth, headHeight);
 
-        // Draw vertical lines for headers
-        xPos = tableX;
-        colWidths.forEach(width => {
-            doc.line(xPos, tableY, xPos, tableY + 10);
-            xPos += width;
-        });
-        doc.line(tableX + tableWidth, tableY, tableX + tableWidth, tableY + 10);
+        for (let i = 0; i < headers.length; i++) {
+            doc.line(headX, y, headX, y + headHeight);
+            doc.text(headers[i], headX + 2, y + 6.5);
+            headX += colWidths[i];
+        }
+        doc.line(tableX + tableWidth, y, tableX + tableWidth, y + headHeight);
+        y += headHeight;
 
-        // Table rows
+        // --- DRAW ROWS ---
         doc.setFont(undefined, 'normal');
-        y = tableY + 10;
-
-        const maxRows = 8;
-        const entryCount = Math.max(entries.length, maxRows);
+        const entryCount = Math.max(entries.length, 8); // Ensures at least 8 rows show up
 
         for (let i = 0; i < entryCount; i++) {
             const entry = entries[i] || {};
-            
-            // Safety check for page bottom (297mm is standard A4 height)
-            if (y > 260) {
-                doc.addPage();
-                y = 20;
-            }
+            if (y > 260) { doc.addPage(); y = 20; }
 
             doc.setFontSize(7);
             
-            // 1. Format Time (12-hour format)
+            // Time Formatting
             let displayTime = '';
             if (entry.time) {
-                const timeStr = String(entry.time);
-                if (timeStr.includes(':')) {
-                    const [hours, minutes] = timeStr.split(':');
-                    const hour = parseInt(hours);
-                    const ampm = hour >= 12 ? 'PM' : 'AM';
-                    const hour12 = hour % 12 || 12;
-                    displayTime = `${hour12}:${minutes} ${ampm}`;
-                } else {
-                    displayTime = timeStr; // Fallback if format is unexpected
-                }
+                const timeParts = String(entry.time).split(':');
+                const hour = parseInt(timeParts[0]);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour % 12 || 12;
+                displayTime = `${hour12}:${timeParts[1] || '00'} ${ampm}`;
             }
             
-            // Map the record data to the columns
+            // Column Mapping
             const values = [
                 displayTime,
                 entry.temp_wind_speed_dir || '',
@@ -154,58 +144,40 @@ Deno.serve(async (req) => {
                 entry.trackout_on_street || '',
                 entry.curbs_and_sidewalks || '',
                 entry.trackout_control_device_effective || '',
-                entry.notes_action_taken || ''
+                entry.notes_action_taken || entry.notes || ''
             ];
             
-            // 2. PRE-CALCULATE WRAPPING & ROW HEIGHT
-            // This is the "brain" that prevents overflow
-            let maxLinesInRow = 1;
-            const padding = 4; // Total horizontal padding (2 left, 2 right)
-            
+            // Wrap Text & Calculate Height
+            let maxLines = 1;
             const wrappedCells = values.map((val, idx) => {
-                const text = String(val);
-                const cellWidth = colWidths[idx] - padding;
-                const lines = doc.splitTextToSize(text, cellWidth);
-                maxLinesInRow = Math.max(maxLinesInRow, lines.length);
+                const lines = doc.splitTextToSize(String(val), colWidths[idx] - 4);
+                maxLines = Math.max(maxLines, lines.length);
                 return lines;
             });
             
-            const lineHeight = 3.5; // Standard height for size 7 font
-            const minRowHeight = 12; // Minimum box height
-            const calculatedHeight = (maxLinesInRow * lineHeight) + 6; // text height + vertical padding
-            const rowHeight = Math.max(minRowHeight, calculatedHeight);
+            const lineHeight = 3.5;
+            const rowHeight = Math.max(12, (maxLines * lineHeight) + 6);
             
-            // 3. DRAW THE ROW BOX
+            // Draw Row and Content
             doc.rect(tableX, y, tableWidth, rowHeight);
-            
-            // 4. DRAW CONTENT & VERTICAL DIVIDERS
             let cellX = tableX;
-            
-            for (let idx = 0; idx < colWidths.length; idx++) {
-                // Draw the vertical line for this cell
-                doc.line(cellX, y, cellX, y + rowHeight);
-                
-                const lines = wrappedCells[idx];
-                if (lines && lines.length > 0) {
-                    // Calculate starting Y to center text vertically within the box
-                    const totalTextHeight = lines.length * lineHeight;
-                    let textY = y + ((rowHeight - totalTextHeight) / 2) + 2.5; 
 
-                    for (const line of lines) {
-                        // Final boundary check: don't print if it would touch the bottom line
+            for (let idx = 0; idx < colWidths.length; idx++) {
+                doc.line(cellX, y, cellX, y + rowHeight);
+                const lines = wrappedCells[idx];
+                if (lines) {
+                    const totalTextHeight = lines.length * lineHeight;
+                    let textY = y + ((rowHeight - totalTextHeight) / 2) + 2.5;
+                    lines.forEach(line => {
                         if (textY < (y + rowHeight - 1)) {
                             doc.text(line, cellX + 2, textY);
                             textY += lineHeight;
                         }
-                    }
+                    });
                 }
                 cellX += colWidths[idx];
             }
-            
-            // Draw the closing vertical line on the far right
             doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
-            
-            // Move Y pointer to the start of the next row
             y += rowHeight;
         }
 
