@@ -220,9 +220,12 @@ Deno.serve(async (req) => {
 
         const result = await uploadResponse.json();
 
-        // Send emails via Resend if configured
+        // Send emails via Resend if configured with PDF attachment
         const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
         const emailPromises = [];
+        
+        // Convert PDF to base64 for attachment
+        const pdfBase64 = btoa(String.fromCharCode(...pdfBlob));
         
         if (project?.superintendent_email) {
             try {
@@ -244,8 +247,12 @@ Deno.serve(async (req) => {
                             <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
                             <li>Inspection Entries: ${entries.length}</li>
                         </ul>
-                        <p>The full inspection report has been saved to Google Drive.</p>
-                    `
+                        <p>Please see the attached PDF for the complete inspection report.</p>
+                    `,
+                    attachments: [{
+                        filename: fileName,
+                        content: pdfBase64
+                    }]
                 });
                 emailPromises.push('superintendent');
             } catch (emailError) {
@@ -272,8 +279,12 @@ Deno.serve(async (req) => {
                             <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
                             <li>Total Entries: ${entries.length}</li>
                         </ul>
-                        <p>Your inspection has been saved to Google Drive for records.</p>
-                    `
+                        <p>Please see the attached PDF for your complete inspection report.</p>
+                    `,
+                    attachments: [{
+                        filename: fileName,
+                        content: pdfBase64
+                    }]
                 });
                 emailPromises.push('inspector');
             } catch (emailError) {
