@@ -92,12 +92,14 @@ Deno.serve(async (req) => {
         
         const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
         let xPos = tableX;
-        
+
         const headers = ['Time', 'Temp, Wind Speed & Dir.', 'Soil Condition', 'Dust Emissions', 'Trackout on Street', 'Curbs & Sidewalks', 'Trackout Control Device Effective', 'Notes, Action Taken'];
-        
+
         headers.forEach((header, i) => {
+            const wrappedText = doc.splitTextToSize(header, colWidths[i] - 2);
             const centerX = xPos + colWidths[i] / 2;
-            doc.text(header, centerX, tableY + 5.5, { maxWidth: colWidths[i] - 2, align: 'center' });
+            const startY = tableY + 3 + (wrappedText.length === 1 ? 2.5 : 1);
+            doc.text(wrappedText, centerX, startY, { align: 'center' });
             xPos += colWidths[i];
         });
 
@@ -155,8 +157,9 @@ Deno.serve(async (req) => {
             values.forEach((val, idx) => {
                 if (val) {
                     // Split text to fit within column width
-                    const textLines = doc.splitTextToSize(val, colWidths[idx] - 3);
-                    doc.text(textLines, xPos + 1.5, y + 7, { maxWidth: colWidths[idx] - 3 });
+                    const textLines = doc.splitTextToSize(val, colWidths[idx] - 4);
+                    // Position text higher in the cell for better fit
+                    doc.text(textLines, xPos + 2, y + 4, { lineHeightFactor: 1.2 });
                 }
                 // Draw vertical lines
                 doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
