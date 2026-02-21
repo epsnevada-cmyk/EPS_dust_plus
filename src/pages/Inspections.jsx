@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Plus, Calendar, User, FileText, Eye, Trash2, ClipboardList } from "lucide-react";
+import { Plus, Calendar, User, FileText, Eye, Trash2, ClipboardList, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Inspections() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -37,6 +38,18 @@ export default function Inspections() {
       await base44.entities.DailyInspection.delete(id);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["inspections"] }),
+  });
+
+  const saveToDriveMutation = useMutation({
+    mutationFn: async (inspectionId) => {
+      await base44.functions.invoke('saveInspectionToDrive', { inspectionId });
+    },
+    onSuccess: () => {
+      toast.success("Inspection saved to Google Drive!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to save to Drive: ${error.message || 'Check settings'}`);
+    },
   });
 
   const filtered = filterProjectId === "all"
@@ -129,6 +142,16 @@ export default function Inspections() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-blue-500 hover:text-blue-700"
+                      onClick={() => saveToDriveMutation.mutate(inspection.id)}
+                      disabled={saveToDriveMutation.isPending}
+                      title="Save to Google Drive"
+                    >
+                      <Upload className="w-4 h-4" />
+                    </Button>
                     <Link to={createPageUrl("InspectionView") + `?id=${inspection.id}`}>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-black">
                         <Eye className="w-4 h-4" />
