@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { jsPDF } from 'npm:jspdf@2.5.1';
+import { Resend } from 'npm:resend@4.0.0';
 
 Deno.serve(async (req) => {
     try {
@@ -115,8 +116,8 @@ Deno.serve(async (req) => {
         doc.setFont(undefined, 'normal');
         y = tableY + 10;
 
-        const rowHeight = 18;
-        const maxRows = 11; // Space for about 11 rows with taller height
+        const rowHeight = 24;
+        const maxRows = 8; // Space for 8 rows with better text wrapping
 
         for (let i = 0; i < Math.max(entries.length, maxRows); i++) {
             const entry = entries[i] || {};
@@ -158,8 +159,14 @@ Deno.serve(async (req) => {
                 if (val) {
                     // Split text to fit within column width
                     const textLines = doc.splitTextToSize(val, colWidths[idx] - 4);
-                    // Position text higher in the cell for better fit
-                    doc.text(textLines, xPos + 2, y + 4, { lineHeightFactor: 1.2 });
+                    // Render each line separately with proper spacing
+                    let lineY = y + 5;
+                    textLines.forEach((line, lineIdx) => {
+                        if (lineIdx < 3) { // Max 3 lines per cell
+                            doc.text(line, xPos + 2, lineY);
+                            lineY += 5;
+                        }
+                    });
                 }
                 // Draw vertical lines
                 doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
@@ -213,15 +220,17 @@ Deno.serve(async (req) => {
 
         const result = await uploadResponse.json();
 
-        // Send emails if emails are configured
+        // Send emails via Resend if configured
+        const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
         const emailPromises = [];
         
         if (project?.superintendent_email) {
             try {
-                await base44.asServiceRole.integrations.Core.SendEmail({
+                await resend.emails.send({
+                    from: 'EPS Dust+ <reports@contact.epsnv.com>',
                     to: project.superintendent_email,
                     subject: `Dust Control Inspection - ${inspection.project_name} - ${inspection.date}`,
-                    body: `
+                    html: `
                         <h2>Daily Dust Control Inspection Report</h2>
                         <p><strong>Project:</strong> ${inspection.project_name}</p>
                         <p><strong>Date:</strong> ${inspection.date}</p>
@@ -240,17 +249,17 @@ Deno.serve(async (req) => {
                 });
                 emailPromises.push('superintendent');
             } catch (emailError) {
-                // Email failed but don't block the main operation
                 console.log('Failed to send superintendent email:', emailError.message);
             }
         }
         
         if (project?.inspector_email) {
             try {
-                await base44.asServiceRole.integrations.Core.SendEmail({
+                await resend.emails.send({
+                    from: 'EPS Dust+ <reports@contact.epsnv.com>',
                     to: project.inspector_email,
                     subject: `Your Inspection Copy - ${inspection.project_name} - ${inspection.date}`,
-                    body: `
+                    html: `
                         <h2>Your Daily Dust Control Inspection Copy</h2>
                         <p><strong>Project:</strong> ${inspection.project_name}</p>
                         <p><strong>Date:</strong> ${inspection.date}</p>
@@ -268,7 +277,6 @@ Deno.serve(async (req) => {
                 });
                 emailPromises.push('inspector');
             } catch (emailError) {
-                // Email failed but don't block the main operation
                 console.log('Failed to send inspector email:', emailError.message);
             }
         }
