@@ -217,12 +217,12 @@ Deno.serve(async (req) => {
 
         const result = await uploadResponse.json();
 
-        // Send emails
+        // Send emails if emails are configured
         const emailPromises = [];
         
         if (project?.superintendent_email) {
-            emailPromises.push(
-                base44.asServiceRole.integrations.Core.SendEmail({
+            try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
                     to: project.superintendent_email,
                     subject: `Dust Control Inspection - ${inspection.project_name} - ${inspection.date}`,
                     body: `
@@ -241,13 +241,17 @@ Deno.serve(async (req) => {
                         </ul>
                         <p>The full inspection report has been saved to Google Drive.</p>
                     `
-                })
-            );
+                });
+                emailPromises.push('superintendent');
+            } catch (emailError) {
+                // Email failed but don't block the main operation
+                console.log('Failed to send superintendent email:', emailError.message);
+            }
         }
         
         if (project?.inspector_email) {
-            emailPromises.push(
-                base44.asServiceRole.integrations.Core.SendEmail({
+            try {
+                await base44.asServiceRole.integrations.Core.SendEmail({
                     to: project.inspector_email,
                     subject: `Your Inspection Copy - ${inspection.project_name} - ${inspection.date}`,
                     body: `
@@ -265,12 +269,12 @@ Deno.serve(async (req) => {
                         </ul>
                         <p>Your inspection has been saved to Google Drive for records.</p>
                     `
-                })
-            );
-        }
-
-        if (emailPromises.length > 0) {
-            await Promise.all(emailPromises);
+                });
+                emailPromises.push('inspector');
+            } catch (emailError) {
+                // Email failed but don't block the main operation
+                console.log('Failed to send inspector email:', emailError.message);
+            }
         }
 
         return Response.json({
