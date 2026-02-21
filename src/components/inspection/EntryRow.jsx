@@ -33,7 +33,12 @@ export default function EntryRow({ entry, onChange, onDelete, index }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-stone-500">Time *</label>
-          <Input type="time" value={entry.time || ""} onChange={(e) => update("time", e.target.value)} />
+          <Input 
+            type="time" 
+            value={entry.time || ""} 
+            onChange={(e) => update("time", e.target.value)}
+            step="60"
+          />
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-stone-500">Temp, Wind Speed & Dir.</label>

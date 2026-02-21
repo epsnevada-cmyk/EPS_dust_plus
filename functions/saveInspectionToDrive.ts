@@ -131,8 +131,18 @@ Deno.serve(async (req) => {
             xPos = tableX + 2;
             doc.setFontSize(7);
             
+            // Convert time to 12-hour format
+            let displayTime = '';
+            if (entry.time) {
+                const [hours, minutes] = entry.time.split(':');
+                const hour = parseInt(hours);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                displayTime = `${hour12}:${minutes} ${ampm}`;
+            }
+            
             const values = [
-                entry.time || '',
+                displayTime,
                 entry.temp_wind_speed_dir || '',
                 entry.soil_condition || '',
                 entry.dust_emissions || '',
