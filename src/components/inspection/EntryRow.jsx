@@ -1,17 +1,22 @@
 import React from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
-const SOIL_CONDITIONS = ["Dry", "Damp", "Wet", "Muddy", "Frozen", "Crusted"];
-const DUST_EMISSIONS = ["None", "Slight", "Moderate", "Heavy", "Excessive"];
-const TRACKOUT_STREET = ["None", "Light", "Moderate", "Heavy"];
-const CURBS_SIDEWALKS = ["Clean", "Light Dust", "Moderate Dust", "Heavy Dust"];
-const DEVICE_EFFECTIVE = ["Yes", "No", "N/A", "Needs Maintenance"];
-
 export default function EntryRow({ entry, onChange, onDelete, index }) {
+  const { data: dropdownOptions = [] } = useQuery({
+    queryKey: ["dropdown-options"],
+    queryFn: () => base44.entities.DropdownOptions.list(),
+  });
+
+  const getOptions = (key) => {
+    const found = dropdownOptions.find(d => d.option_key === key);
+    return found?.options || [];
+  };
   const update = (field, value) => {
     onChange(index, { ...entry, [field]: value });
   };
@@ -37,14 +42,14 @@ export default function EntryRow({ entry, onChange, onDelete, index }) {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <DropdownField label="Soil Condition" value={entry.soil_condition} options={SOIL_CONDITIONS} onChange={(v) => update("soil_condition", v)} />
-        <DropdownField label="Dust Emissions" value={entry.dust_emissions} options={DUST_EMISSIONS} onChange={(v) => update("dust_emissions", v)} />
-        <DropdownField label="Trackout on Street" value={entry.trackout_on_street} options={TRACKOUT_STREET} onChange={(v) => update("trackout_on_street", v)} />
-        <DropdownField label="Curbs & Sidewalks" value={entry.curbs_and_sidewalks} options={CURBS_SIDEWALKS} onChange={(v) => update("curbs_and_sidewalks", v)} />
+        <DropdownField label="Soil Condition" value={entry.soil_condition} options={getOptions("soil_condition")} onChange={(v) => update("soil_condition", v)} />
+        <DropdownField label="Dust Emissions" value={entry.dust_emissions} options={getOptions("dust_emissions")} onChange={(v) => update("dust_emissions", v)} />
+        <DropdownField label="Trackout on Street" value={entry.trackout_on_street} options={getOptions("trackout_on_street")} onChange={(v) => update("trackout_on_street", v)} />
+        <DropdownField label="Curbs & Sidewalks" value={entry.curbs_and_sidewalks} options={getOptions("curbs_sidewalks")} onChange={(v) => update("curbs_and_sidewalks", v)} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DropdownField label="Trackout Control Device Effective" value={entry.trackout_control_device_effective} options={DEVICE_EFFECTIVE} onChange={(v) => update("trackout_control_device_effective", v)} />
+        <DropdownField label="Trackout Control Device Effective" value={entry.trackout_control_device_effective} options={getOptions("device_effective")} onChange={(v) => update("trackout_control_device_effective", v)} />
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-stone-500">Notes, Action Taken</label>
           <Textarea
