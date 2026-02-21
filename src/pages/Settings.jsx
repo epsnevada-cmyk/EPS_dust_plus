@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Save, ExternalLink, Info, CheckCircle2 } from "lucide-react";
+import { Save, ExternalLink, Info, CheckCircle2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -18,6 +19,11 @@ export default function Settings() {
   const { data: settings = [], isLoading } = useQuery({
     queryKey: ["settings"],
     queryFn: () => base44.entities.AppSettings.filter({ setting_key: "app_settings" }),
+  });
+
+  const { data: dropdownOptions = [] } = useQuery({
+    queryKey: ["dropdown-options"],
+    queryFn: () => base44.entities.DropdownOptions.list(),
   });
 
   useEffect(() => {
@@ -53,14 +59,43 @@ export default function Settings() {
     setSaving(false);
   };
 
+  const handleSaveDropdowns = async () => {
+    setSaving(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["dropdown-options"] });
+      toast.success("Dropdown options saved!");
+    } catch (error) {
+      toast.error("Failed to save dropdown options");
+    }
+    setSaving(false);
+  };
+
+  const handleUpdateOptions = async (optionId, newOptions) => {
+    await base44.entities.DropdownOptions.update(optionId, { options: newOptions });
+    queryClient.invalidateQueries({ queryKey: ["dropdown-options"] });
+  };
+
+  const handleAddOption = async (optionId, currentOptions) => {
+    const newOption = prompt("Enter new option:");
+    if (newOption?.trim()) {
+      await handleUpdateOptions(optionId, [...currentOptions, newOption.trim()]);
+    }
+  };
+
+  const handleRemoveOption = async (optionId, currentOptions, index) => {
+    const updated = currentOptions.filter((_, i) => i !== index);
+    await handleUpdateOptions(optionId, updated);
+  };
+
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-stone-900">Settings</h1>
-        <p className="text-sm text-stone-500 mt-1">Configure Google Drive integration</p>
+        <p className="text-sm text-stone-500 mt-1">Configure Google Drive integration and dropdown options</p>
       </div>
 
-      <Card className="border-stone-200">
+      <div className="space-y-6">
+        <Card className="border-stone-200">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -168,6 +203,45 @@ export default function Settings() {
           )}
         </CardContent>
       </Card>
+
+      {/* Dropdown Options */}
+      <Card className="border-stone-200">
+        <CardHeader>
+          <CardTitle className="text-base">Dropdown Options</CardTitle>
+          <p className="text-sm text-stone-500">Customize the options available in inspection form dropdowns</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {dropdownOptions.map((dropdown) => (
+            <div key={dropdown.id} className="space-y-3 pb-4 border-b border-stone-100 last:border-0 last:pb-0">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">{dropdown.label}</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAddOption(dropdown.id, dropdown.options)}
+                  className="h-7 text-xs gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Add Option
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {dropdown.options.map((option, idx) => (
+                  <Badge key={idx} variant="outline" className="gap-1.5 pr-1 py-1">
+                    {option}
+                    <button
+                      onClick={() => handleRemoveOption(dropdown.id, dropdown.options, idx)}
+                      className="hover:bg-stone-200 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+      </div>
     </div>
   );
 }
