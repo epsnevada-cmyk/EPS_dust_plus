@@ -18,11 +18,21 @@ Deno.serve(async (req) => {
 
         // Get settings
         const settings = await base44.asServiceRole.entities.AppSettings.filter({ setting_key: 'app_settings' });
-        const folderId = settings[0]?.google_drive_folder_id;
+        let folderId = settings[0]?.google_drive_folder_id;
 
         if (!folderId) {
             return Response.json({ error: 'Google Drive folder not configured. Please set it in Settings.' }, { status: 400 });
         }
+
+        // Extract folder ID from URL if full URL was provided
+        if (folderId.includes('drive.google.com')) {
+            const match = folderId.match(/folders\/([a-zA-Z0-9_-]+)/);
+            if (match) {
+                folderId = match[1];
+            }
+        }
+        // Remove any query parameters
+        folderId = folderId.split('?')[0];
 
         // Get inspection data
         const inspections = await base44.asServiceRole.entities.DailyInspection.filter({ id: inspectionId });

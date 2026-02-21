@@ -111,9 +111,11 @@ export default function Settings() {
             <p className="text-xs text-stone-600 flex items-start gap-2">
               <Info className="w-3 h-3 mt-0.5 shrink-0" />
               <span>
-                To find folder ID: Open the folder in Google Drive, copy the ID from the URL after <code className="bg-stone-100 px-1 rounded">/folders/</code>
+                To find folder ID: Open the folder in Google Drive, copy just the ID from the URL (the part after <code className="bg-stone-100 px-1 rounded">/folders/</code>)
                 <br />
                 Example: drive.google.com/drive/folders/<strong>1a2b3c4d5e6f7g8h9i0j</strong>
+                <br />
+                <span className="text-amber-600 font-medium">Just paste: 1a2b3c4d5e6f7g8h9i0j (not the full URL)</span>
               </span>
             </p>
           </div>
