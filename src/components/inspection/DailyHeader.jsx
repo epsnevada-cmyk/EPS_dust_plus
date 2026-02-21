@@ -1,10 +1,22 @@
 import React from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function DailyHeader({ form, setForm }) {
   const truckOptions = Array.from({ length: 25 }, (_, i) => i + 1);
+
+  const { data: dropdownOptions = [] } = useQuery({
+    queryKey: ["dropdown-options"],
+    queryFn: () => base44.entities.DropdownOptions.list(),
+  });
+
+  const getOptions = (key) => {
+    const found = dropdownOptions.find(d => d.option_key === key);
+    return found?.options || ["Yes", "No"];
+  };
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-5 sm:p-6 space-y-5">
@@ -38,8 +50,9 @@ export default function DailyHeader({ form, setForm }) {
               <SelectValue placeholder="Select..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              {getOptions("dust_sign_posted").map((opt) => (
+                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -51,8 +64,9 @@ export default function DailyHeader({ form, setForm }) {
               <SelectValue placeholder="Select..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
+              {getOptions("dust_permit_on_site").map((opt) => (
+                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
