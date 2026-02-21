@@ -96,12 +96,12 @@ Deno.serve(async (req) => {
         doc.setFont(undefined, 'bold');
         
         const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
-        let xPos = tableX + 2;
+        let xPos = tableX;
         
         const headers = ['Time', 'Temp, Wind Speed & Dir.', 'Soil Condition', 'Dust Emissions', 'Trackout on Street', 'Curbs & Sidewalks', 'Trackout Control Device Effective', 'Notes, Action Taken'];
         
         headers.forEach((header, i) => {
-            doc.text(header, xPos, tableY + 6, { maxWidth: colWidths[i] - 2 });
+            doc.text(header, xPos + colWidths[i] / 2, tableY + 6, { maxWidth: colWidths[i] - 4, align: 'center' });
             xPos += colWidths[i];
         });
 
