@@ -73,69 +73,57 @@ Deno.serve(async (req) => {
         y += 8;
         doc.text('Record daily inspection results and corrective measures for dust control below:', leftCol, y);
 
-        // --- SUMMARY BOX (Permit & Truck Info) ---
+        // --- COMPACT SUMMARY BOX ---
         y += 10;
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
-
-        // Draw a subtle border box for the summary
         doc.setDrawColor(200, 200, 200);
-        doc.rect(15, y, 180, 25);
+        doc.rect(15, y, 180, 18); // Reduced height from 25 to 18
 
-        // Fill data from the inspection record
-        doc.text(`Dust Permit Onsite: ${inspection.dust_permit_on_site || 'No'}`, 20, y + 8);
-        doc.text(`Dust Sign Posted: ${inspection.dust_sign_posted || 'Yes'}`, 20, y + 16);
-        doc.text(`Soil Import/Export Trucks Running: ${inspection.soil_import_export_trucks_running || '0'}`, 100, y + 8);
-        doc.text(`Project: ${inspection.project_name || 'N/A'}`, 100, y + 16);
+        doc.text(`Permit Onsite: ${inspection.dust_permit_on_site || 'Yes'}`, 20, y + 7);
+        doc.text(`Sign Posted: ${inspection.dust_sign_posted || 'Yes'}`, 20, y + 13);
+        doc.text(`Trucks Running: ${inspection.soil_import_export_trucks_running || '9'}`, 90, y + 7);
+        doc.text(`Project: ${inspection.project_name || 'N/A'}`, 90, y + 13);
 
-        y += 35; // Move Y down to start the table
+        y += 25; // Compacted spacing before table
         
-        // --- TABLE CONFIGURATION ---
-        const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
+        // --- CONFIGURATION & COMPACT DIMENSIONS ---
+        const colWidths = [18, 25, 20, 20, 20, 22, 25, 40]; // Slightly tightened for better fit
         const tableWidth = colWidths.reduce((a, b) => a + b, 0);
         const tableX = 15;
 
-        // --- DRAW HEADERS ---
+        // --- COMPACT TABLE HEADER ---
         doc.setFontSize(8);
-        doc.setFont(undefined, 'bold');
-        const headers = ["Time", "Temp/Wind", "Soil Cond.", "Dust Emis.", "Trackout", "Curbs/Swalk", "Control Eff.", "Notes/Action"];
+        doc.setFillColor(240, 240, 240);
+        doc.rect(tableX, y, tableWidth, 8, 'F');
+        doc.rect(tableX, y, tableWidth, 8);
 
+        const headers = ["Time", "Temp/Wnd", "Soil", "Dust", "Trackout", "Curbs", "Effect.", "Notes/Action"];
         let headX = tableX;
-        let headHeight = 10;
-
-        doc.setFillColor(240, 240, 240); // Grey header background
-        doc.rect(tableX, y, tableWidth, headHeight, 'F');
-        doc.rect(tableX, y, tableWidth, headHeight);
-
         for (let i = 0; i < headers.length; i++) {
-            doc.line(headX, y, headX, y + headHeight);
-            doc.text(headers[i], headX + 2, y + 6.5);
+            doc.line(headX, y, headX, y + 8);
+            doc.text(headers[i], headX + 1.5, y + 5.5);
             headX += colWidths[i];
         }
-        doc.line(tableX + tableWidth, y, tableX + tableWidth, y + headHeight);
-        y += headHeight;
+        doc.line(tableX + tableWidth, y, tableX + tableWidth, y + 8);
+        y += 8;
 
-        // --- DRAW ROWS ---
+        // --- DATA ROWS (ONLY DRAW WHAT IS NEEDED) ---
         doc.setFont(undefined, 'normal');
-        const entryCount = Math.max(entries.length, 8); // Ensures at least 8 rows show up
+        doc.setFontSize(7);
 
-        for (let i = 0; i < entryCount; i++) {
-            const entry = entries[i] || {};
-            if (y > 260) { doc.addPage(); y = 20; }
+        // If no entries, show 5 empty rows; otherwise just show the entries
+        const displayRows = entries.length > 0 ? entries : new Array(5).fill({});
 
-            doc.setFontSize(7);
-            
-            // Time Formatting
+        displayRows.forEach((entry) => {
+            // Formatting Time
             let displayTime = '';
             if (entry.time) {
-                const timeParts = String(entry.time).split(':');
-                const hour = parseInt(timeParts[0]);
-                const ampm = hour >= 12 ? 'PM' : 'AM';
-                const hour12 = hour % 12 || 12;
-                displayTime = `${hour12}:${timeParts[1] || '00'} ${ampm}`;
+                const [h, m] = String(entry.time).split(':');
+                const hour = parseInt(h);
+                displayTime = `${hour % 12 || 12}:${m || '00'} ${hour >= 12 ? 'PM' : 'AM'}`;
             }
-            
-            // Column Mapping
+
             const values = [
                 displayTime,
                 entry.temp_wind_speed_dir || '',
@@ -146,19 +134,18 @@ Deno.serve(async (req) => {
                 entry.trackout_control_device_effective || '',
                 entry.notes_action_taken || entry.notes || ''
             ];
-            
-            // Wrap Text & Calculate Height
+
+            // Wrapping logic
             let maxLines = 1;
             const wrappedCells = values.map((val, idx) => {
-                const lines = doc.splitTextToSize(String(val), colWidths[idx] - 4);
+                const lines = doc.splitTextToSize(String(val), colWidths[idx] - 3);
                 maxLines = Math.max(maxLines, lines.length);
                 return lines;
             });
-            
-            const lineHeight = 3.5;
-            const rowHeight = Math.max(12, (maxLines * lineHeight) + 6);
-            
-            // Draw Row and Content
+
+            const lineHeight = 3.2; // Tighter line height
+            const rowHeight = Math.max(9, (maxLines * lineHeight) + 3); // Reduced row padding
+
             doc.rect(tableX, y, tableWidth, rowHeight);
             let cellX = tableX;
 
@@ -166,20 +153,17 @@ Deno.serve(async (req) => {
                 doc.line(cellX, y, cellX, y + rowHeight);
                 const lines = wrappedCells[idx];
                 if (lines) {
-                    const totalTextHeight = lines.length * lineHeight;
-                    let textY = y + ((rowHeight - totalTextHeight) / 2) + 2.5;
+                    let textY = y + ((rowHeight - (lines.length * lineHeight)) / 2) + 2.2;
                     lines.forEach(line => {
-                        if (textY < (y + rowHeight - 1)) {
-                            doc.text(line, cellX + 2, textY);
-                            textY += lineHeight;
-                        }
+                        doc.text(line, cellX + 1.5, textY);
+                        textY += lineHeight;
                     });
                 }
                 cellX += colWidths[idx];
             }
             doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
             y += rowHeight;
-        }
+        });
 
         // Footer text
         doc.setFontSize(7);
