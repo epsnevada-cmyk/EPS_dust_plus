@@ -11,6 +11,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Dashboard", page: "Dashboard", icon: Home },
     { name: "Projects", page: "Projects", icon: FolderOpen },
     { name: "Inspections", page: "Inspections", icon: ClipboardList },
+    { name: "Settings", page: "Settings", icon: Menu },
   ];
 
   return (

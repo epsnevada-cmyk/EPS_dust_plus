@@ -173,8 +173,16 @@ export default function DailyInspectionForm() {
 
     queryClient.invalidateQueries({ queryKey: ["inspections"] });
     queryClient.invalidateQueries({ queryKey: ["all-inspections"] });
+    
+    // Save to Google Drive
+    try {
+      await base44.functions.invoke('saveInspectionToDrive', { inspectionId });
+      toast.success("Inspection saved and uploaded to Google Drive!");
+    } catch (driveError) {
+      toast.success("Inspection saved! (Google Drive upload failed - check settings)");
+    }
+    
     setSaving(false);
-    toast.success("Inspection saved!");
     window.location.href = createPageUrl("Inspections") + `?projectId=${selectedProjectId}`;
   };
 
