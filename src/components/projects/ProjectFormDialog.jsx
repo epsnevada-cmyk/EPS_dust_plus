@@ -16,6 +16,8 @@ export default function ProjectFormDialog({ open, onOpenChange, onSubmit }) {
     project_name: "",
     dust_permit_number: "",
     completed_by: "",
+    superintendent_email: "",
+    inspector_email: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -24,7 +26,7 @@ export default function ProjectFormDialog({ open, onOpenChange, onSubmit }) {
     setSaving(true);
     await onSubmit({ ...form, status: "active" });
     setSaving(false);
-    setForm({ project_name: "", dust_permit_number: "", completed_by: "" });
+    setForm({ project_name: "", dust_permit_number: "", completed_by: "", superintendent_email: "", inspector_email: "" });
     onOpenChange(false);
   };
 
@@ -61,6 +63,26 @@ export default function ProjectFormDialog({ open, onOpenChange, onSubmit }) {
               placeholder="Inspector name"
               value={form.completed_by}
               onChange={(e) => setForm({ ...form, completed_by: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="superintendent_email">Superintendent Email</Label>
+            <Input
+              id="superintendent_email"
+              type="email"
+              placeholder="superintendent@example.com"
+              value={form.superintendent_email}
+              onChange={(e) => setForm({ ...form, superintendent_email: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="inspector_email">Inspector Email</Label>
+            <Input
+              id="inspector_email"
+              type="email"
+              placeholder="inspector@example.com"
+              value={form.inspector_email}
+              onChange={(e) => setForm({ ...form, inspector_email: e.target.value })}
             />
           </div>
           <DialogFooter>

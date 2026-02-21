@@ -12,6 +12,7 @@ import { toast } from "sonner";
 export default function Settings() {
   const queryClient = useQueryClient();
   const [folderId, setFolderId] = useState("");
+  const [plansFolderId, setPlansFolderId] = useState("");
   const [saving, setSaving] = useState(false);
 
   const { data: settings = [], isLoading } = useQuery({
@@ -23,6 +24,9 @@ export default function Settings() {
     if (settings[0]?.google_drive_folder_id) {
       setFolderId(settings[0].google_drive_folder_id);
     }
+    if (settings[0]?.plans_permits_folder_id) {
+      setPlansFolderId(settings[0].plans_permits_folder_id);
+    }
   }, [settings]);
 
   const handleSave = async () => {
@@ -31,11 +35,13 @@ export default function Settings() {
       if (settings[0]) {
         await base44.entities.AppSettings.update(settings[0].id, {
           google_drive_folder_id: folderId,
+          plans_permits_folder_id: plansFolderId,
           setting_key: "app_settings",
         });
       } else {
         await base44.entities.AppSettings.create({
           google_drive_folder_id: folderId,
+          plans_permits_folder_id: plansFolderId,
           setting_key: "app_settings",
         });
       }
@@ -74,7 +80,7 @@ export default function Settings() {
           </Alert>
 
           <div className="space-y-2">
-            <Label htmlFor="folder_id">Google Drive Folder ID</Label>
+            <Label htmlFor="folder_id">Inspections Folder ID</Label>
             <Input
               id="folder_id"
               placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j"
@@ -82,12 +88,32 @@ export default function Settings() {
               onChange={(e) => setFolderId(e.target.value)}
               className="font-mono text-sm"
             />
-            <p className="text-xs text-stone-500 flex items-start gap-2 mt-2">
+            <p className="text-xs text-stone-500">
+              Inspection PDFs will be automatically saved to this folder
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="plans_folder_id">Plans & Permits Folder ID</Label>
+            <Input
+              id="plans_folder_id"
+              placeholder="e.g. 1a2b3c4d5e6f7g8h9i0j"
+              value={plansFolderId}
+              onChange={(e) => setPlansFolderId(e.target.value)}
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-stone-500">
+              Folder for job documents, plans, and permits
+            </p>
+          </div>
+
+          <div className="bg-stone-50 border border-stone-200 rounded-lg p-3">
+            <p className="text-xs text-stone-600 flex items-start gap-2">
               <Info className="w-3 h-3 mt-0.5 shrink-0" />
               <span>
-                To find your folder ID: Open the folder in Google Drive, copy the ID from the URL after <code className="bg-stone-100 px-1 rounded">/folders/</code>
+                To find folder ID: Open the folder in Google Drive, copy the ID from the URL after <code className="bg-stone-100 px-1 rounded">/folders/</code>
                 <br />
-                Example URL: drive.google.com/drive/folders/<strong>1a2b3c4d5e6f7g8h9i0j</strong>
+                Example: drive.google.com/drive/folders/<strong>1a2b3c4d5e6f7g8h9i0j</strong>
               </span>
             </p>
           </div>
@@ -106,16 +132,28 @@ export default function Settings() {
                 </>
               )}
             </Button>
-            {folderId && (
-              <a
-                href={`https://drive.google.com/drive/folders/${folderId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                Open Folder <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
+            <div className="flex gap-3">
+              {folderId && (
+                <a
+                  href={`https://drive.google.com/drive/folders/${folderId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  Open Inspections <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+              {plansFolderId && (
+                <a
+                  href={`https://drive.google.com/drive/folders/${plansFolderId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                >
+                  Open Plans & Permits <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
 
           {settings[0] && (

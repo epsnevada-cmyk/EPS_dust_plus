@@ -4,9 +4,9 @@ import { createPageUrl } from "../../utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, FileText, ChevronRight, Trash2 } from "lucide-react";
+import { FolderOpen, FileText, ChevronRight, Trash2, FileCheck } from "lucide-react";
 
-export default function ProjectCard({ project, inspectionCount, onDelete }) {
+export default function ProjectCard({ project, inspectionCount, onDelete, plansFolderId }) {
   return (
     <Card className="group hover:shadow-md transition-all duration-300 border-stone-200 overflow-hidden">
       <CardContent className="p-0">
@@ -48,6 +48,14 @@ export default function ProjectCard({ project, inspectionCount, onDelete }) {
                   View <ChevronRight className="w-3 h-3" />
                 </Button>
               </Link>
+              {plansFolderId && (
+                <a href={`https://drive.google.com/drive/folders/${plansFolderId}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 border-[var(--accent)] text-[var(--brand)] hover:bg-[var(--accent-light)]">
+                    <FileCheck className="w-3 h-3" />
+                    Plans
+                  </Button>
+                </a>
+              )}
               <Button variant="ghost" size="icon" className="text-stone-400 hover:text-red-500" onClick={() => onDelete(project.id)}>
                 <Trash2 className="w-4 h-4" />
               </Button>

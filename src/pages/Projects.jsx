@@ -23,6 +23,11 @@ export default function Projects() {
     queryFn: () => base44.entities.DailyInspection.list(),
   });
 
+  const { data: settings = [] } = useQuery({
+    queryKey: ["settings"],
+    queryFn: () => base44.entities.AppSettings.filter({ setting_key: "app_settings" }),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Project.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["projects"] }),
@@ -85,6 +90,7 @@ export default function Projects() {
               project={project}
               inspectionCount={getInspectionCount(project.id)}
               onDelete={(id) => deleteMutation.mutate(id)}
+              plansFolderId={settings[0]?.plans_permits_folder_id}
             />
           ))}
         </div>

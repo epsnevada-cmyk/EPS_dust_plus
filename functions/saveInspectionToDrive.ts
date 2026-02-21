@@ -34,75 +34,129 @@ Deno.serve(async (req) => {
 
         const entries = await base44.asServiceRole.entities.InspectionEntry.filter({ daily_inspection_id: inspectionId });
 
-        // Generate PDF
+        // Get project for emails
+        const projects = await base44.asServiceRole.entities.Project.filter({ id: inspection.project_id });
+        const project = projects[0];
+
+        // Generate PDF - matching the original form layout
         const doc = new jsPDF();
         
-        // Title
-        doc.setFontSize(14);
+        // Title - centered and bold
+        doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
-        doc.text('DUST CONTROL MONITOR RECORD', 105, 15, { align: 'center' });
-        doc.text('OF DAILY DUST CONTROL INSPECTIONS AND ACTIONS', 105, 22, { align: 'center' });
+        doc.text('DUST CONTROL MONITOR RECORD OF DAILY DUST CONTROL INSPECTIONS AND ACTIONS', 105, 15, { align: 'center' });
 
-        // Header info
+        // Header information - mimicking the form
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
         
-        doc.text(`Project Name: ${inspection.project_name || '—'}`, 20, 35);
-        doc.text(`Date: ${inspection.date || '—'}`, 135, 35);
-        doc.text(`Dust Permit Number: ${inspection.dust_permit_number || '—'}`, 20, 42);
-        doc.text(`Completed By: ${inspection.completed_by || '—'}`, 135, 42);
-
-        // Daily section
-        doc.setFontSize(9);
-        doc.text(`Daily: Dust Sign Posted: ${inspection.dust_sign_posted || '—'}`, 20, 52);
-        doc.text(`Dust Permit Onsite: ${inspection.dust_permit_on_site || '—'}`, 85, 52);
-        doc.text(`Soil Import/Export Trucks Running: ${inspection.soil_import_export_trucks_running || '—'}`, 145, 52);
-
-        // Table headers
-        let y = 65;
-        doc.setFillColor(240, 240, 240);
-        doc.rect(15, y - 5, 180, 8, 'F');
+        const leftCol = 20;
+        const rightCol = 115;
+        let y = 30;
         
-        doc.setFont(undefined, 'bold');
+        doc.text(`Project Name: ${inspection.project_name || '___________________________'}`, leftCol, y);
+        doc.text(`Date: ${inspection.date || '_______________'}`, rightCol, y);
+        
+        y += 8;
+        doc.text(`Dust Permit Number: ${inspection.dust_permit_number || '_______________'}`, leftCol, y);
+        doc.text(`Completed By: ${inspection.completed_by || '___________________________'}`, rightCol, y);
+
+        y += 10;
+        doc.setFontSize(9);
+        doc.text('Record daily inspection results and corrective measures for dust control below:', leftCol, y);
+
+        y += 8;
+        doc.text(`Daily:   Dust Sign Posted: ${inspection.dust_sign_posted || '______'}`, leftCol, y);
+        doc.text(`Dust Permit Onsite: ${inspection.dust_permit_on_site || '______'}`, leftCol + 65, y);
+        doc.text(`Soil Import/Export Trucks Running: ${inspection.soil_import_export_trucks_running || '____'}`, leftCol + 120, y);
+
+        // Table - matching original form structure
+        y += 10;
+        
+        // Draw table border
+        const tableX = 15;
+        const tableY = y;
+        const tableWidth = 180;
+        
+        // Table headers with borders
+        doc.setFillColor(245, 245, 245);
+        doc.rect(tableX, tableY, tableWidth, 10, 'FD');
+        
         doc.setFontSize(8);
-        doc.text('Time', 18, y);
-        doc.text('Temp/Wind', 35, y);
-        doc.text('Soil', 60, y);
-        doc.text('Dust', 78, y);
-        doc.text('Track', 95, y);
-        doc.text('Curbs', 112, y);
-        doc.text('Device', 130, y);
-        doc.text('Notes', 155, y);
+        doc.setFont(undefined, 'bold');
+        
+        const colWidths = [18, 28, 20, 20, 22, 22, 28, 42];
+        let xPos = tableX + 2;
+        
+        const headers = ['Time', 'Temp, Wind Speed & Dir.', 'Soil Condition', 'Dust Emissions', 'Trackout on Street', 'Curbs & Sidewalks', 'Trackout Control Device Effective', 'Notes, Action Taken'];
+        
+        headers.forEach((header, i) => {
+            doc.text(header, xPos, tableY + 6, { maxWidth: colWidths[i] - 2 });
+            xPos += colWidths[i];
+        });
+
+        // Draw vertical lines for headers
+        xPos = tableX;
+        colWidths.forEach(width => {
+            doc.line(xPos, tableY, xPos, tableY + 10);
+            xPos += width;
+        });
+        doc.line(tableX + tableWidth, tableY, tableX + tableWidth, tableY + 10);
 
         // Table rows
         doc.setFont(undefined, 'normal');
-        y += 8;
+        y = tableY + 10;
 
-        for (const entry of entries) {
+        const rowHeight = 12;
+        const maxRows = 14; // Space for about 14 rows
+
+        for (let i = 0; i < Math.max(entries.length, maxRows); i++) {
+            const entry = entries[i] || {};
+            
             if (y > 270) {
                 doc.addPage();
                 y = 20;
             }
 
+            // Draw row borders
+            doc.rect(tableX, y, tableWidth, rowHeight);
+            
+            // Draw cell content
+            xPos = tableX + 2;
             doc.setFontSize(7);
-            doc.text(entry.time || '—', 18, y);
-            doc.text((entry.temp_wind_speed_dir || '—').substring(0, 12), 35, y);
-            doc.text((entry.soil_condition || '—').substring(0, 8), 60, y);
-            doc.text((entry.dust_emissions || '—').substring(0, 8), 78, y);
-            doc.text((entry.trackout_on_street || '—').substring(0, 8), 95, y);
-            doc.text((entry.curbs_and_sidewalks || '—').substring(0, 10), 112, y);
-            doc.text((entry.trackout_control_device_effective || '—').substring(0, 8), 130, y);
             
-            const notes = (entry.notes_action_taken || '—').substring(0, 30);
-            doc.text(notes, 155, y);
+            const values = [
+                entry.time || '',
+                entry.temp_wind_speed_dir || '',
+                entry.soil_condition || '',
+                entry.dust_emissions || '',
+                entry.trackout_on_street || '',
+                entry.curbs_and_sidewalks || '',
+                entry.trackout_control_device_effective || '',
+                entry.notes_action_taken || ''
+            ];
             
-            y += 7;
+            values.forEach((val, idx) => {
+                if (val) {
+                    doc.text(val, xPos, y + 7, { maxWidth: colWidths[idx] - 3 });
+                }
+                // Draw vertical lines
+                doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
+                xPos += colWidths[idx];
+            });
+            doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
+            
+            y += rowHeight;
         }
 
-        // Footer
+        // Footer text
         doc.setFontSize(7);
-        doc.text('This record must be maintained onsite for 1 year or, in the Permittee\'s files for 6 months', 20, 285);
-        doc.text('beyond project completion and made available for inspection to Air Quality staff.', 20, 290);
+        doc.setFont(undefined, 'italic');
+        const footerY = 280;
+        doc.text('This record must be maintained onsite for 1 year or, in the Permittee\'s files for 6 months beyond project completion', 20, footerY);
+        doc.text('and made available for inspection to Air Quality staff.', 20, footerY + 4);
+        
+        doc.text(`Page __ of __`, 105, footerY + 10, { align: 'center' });
 
         const pdfBytes = doc.output('arraybuffer');
         const pdfBlob = new Uint8Array(pdfBytes);
@@ -138,11 +192,68 @@ Deno.serve(async (req) => {
 
         const result = await uploadResponse.json();
 
+        // Send emails
+        const emailPromises = [];
+        
+        if (project?.superintendent_email) {
+            emailPromises.push(
+                base44.asServiceRole.integrations.Core.SendEmail({
+                    to: project.superintendent_email,
+                    subject: `Dust Control Inspection - ${inspection.project_name} - ${inspection.date}`,
+                    body: `
+                        <h2>Daily Dust Control Inspection Report</h2>
+                        <p><strong>Project:</strong> ${inspection.project_name}</p>
+                        <p><strong>Date:</strong> ${inspection.date}</p>
+                        <p><strong>Completed By:</strong> ${inspection.completed_by || 'N/A'}</p>
+                        <p><strong>Dust Permit #:</strong> ${inspection.dust_permit_number || 'N/A'}</p>
+                        <hr>
+                        <p><strong>Summary:</strong></p>
+                        <ul>
+                            <li>Dust Sign Posted: ${inspection.dust_sign_posted || 'N/A'}</li>
+                            <li>Dust Permit On Site: ${inspection.dust_permit_on_site || 'N/A'}</li>
+                            <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
+                            <li>Inspection Entries: ${entries.length}</li>
+                        </ul>
+                        <p>The full inspection report has been saved to Google Drive.</p>
+                    `
+                })
+            );
+        }
+        
+        if (project?.inspector_email) {
+            emailPromises.push(
+                base44.asServiceRole.integrations.Core.SendEmail({
+                    to: project.inspector_email,
+                    subject: `Your Inspection Copy - ${inspection.project_name} - ${inspection.date}`,
+                    body: `
+                        <h2>Your Daily Dust Control Inspection Copy</h2>
+                        <p><strong>Project:</strong> ${inspection.project_name}</p>
+                        <p><strong>Date:</strong> ${inspection.date}</p>
+                        <p><strong>Completed By:</strong> ${inspection.completed_by || 'N/A'}</p>
+                        <hr>
+                        <p><strong>Inspection Summary:</strong></p>
+                        <ul>
+                            <li>Dust Sign Posted: ${inspection.dust_sign_posted || 'N/A'}</li>
+                            <li>Dust Permit On Site: ${inspection.dust_permit_on_site || 'N/A'}</li>
+                            <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
+                            <li>Total Entries: ${entries.length}</li>
+                        </ul>
+                        <p>Your inspection has been saved to Google Drive for records.</p>
+                    `
+                })
+            );
+        }
+
+        if (emailPromises.length > 0) {
+            await Promise.all(emailPromises);
+        }
+
         return Response.json({
             success: true,
             fileId: result.id,
             fileName: fileName,
-            message: 'Inspection saved to Google Drive'
+            emailsSent: emailPromises.length,
+            message: `Inspection saved to Google Drive${emailPromises.length > 0 ? ' and emails sent' : ''}`
         });
 
     } catch (error) {
