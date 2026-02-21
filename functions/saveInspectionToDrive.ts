@@ -116,22 +116,16 @@ Deno.serve(async (req) => {
         doc.setFont(undefined, 'normal');
         y = tableY + 10;
 
-        const rowHeight = 24;
-        const maxRows = 8; // Space for 8 rows with better text wrapping
+        const maxRows = 8;
 
         for (let i = 0; i < Math.max(entries.length, maxRows); i++) {
             const entry = entries[i] || {};
             
-            if (y > 270) {
+            if (y > 260) {
                 doc.addPage();
                 y = 20;
             }
 
-            // Draw row borders
-            doc.rect(tableX, y, tableWidth, rowHeight);
-            
-            // Draw cell content
-            xPos = tableX + 2;
             doc.setFontSize(7);
             
             // Convert time to 12-hour format
@@ -155,17 +149,30 @@ Deno.serve(async (req) => {
                 entry.notes_action_taken || ''
             ];
             
-            values.forEach((val, idx) => {
-                if (val) {
-                    // Split text to fit within column width
-                    const textLines = doc.splitTextToSize(val, colWidths[idx] - 4);
-                    // Render each line separately with proper spacing
-                    let lineY = y + 5;
-                    textLines.forEach((line, lineIdx) => {
-                        if (lineIdx < 3) { // Max 3 lines per cell
-                            doc.text(line, xPos + 2, lineY);
-                            lineY += 5;
-                        }
+            // Calculate dynamic row height based on content
+            let maxLines = 1;
+            const wrappedCells = values.map((val, idx) => {
+                if (!val) return [];
+                const lines = doc.splitTextToSize(val, colWidths[idx] - 4);
+                maxLines = Math.max(maxLines, lines.length);
+                return lines;
+            });
+            
+            const lineHeight = 4;
+            const rowHeight = Math.max(12, maxLines * lineHeight + 6);
+            
+            // Draw row borders
+            doc.rect(tableX, y, tableWidth, rowHeight);
+            
+            // Draw cell content
+            xPos = tableX + 2;
+            
+            wrappedCells.forEach((lines, idx) => {
+                if (lines.length > 0) {
+                    let lineY = y + 4;
+                    lines.forEach((line) => {
+                        doc.text(line, xPos + 2, lineY);
+                        lineY += lineHeight;
                     });
                 }
                 // Draw vertical lines
