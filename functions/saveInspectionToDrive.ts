@@ -51,21 +51,6 @@ Deno.serve(async (req) => {
         // Generate PDF - matching the original form layout
         const doc = new jsPDF();
         
-        // Add logo at top left
-        try {
-            const logoUrl = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6998f3b35e48dacf2f6a83dc/def829a01_unnamed.jpg';
-            const logoResponse = await fetch(logoUrl);
-            const logoBlob = await logoResponse.blob();
-            const logoBase64 = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(logoBlob);
-            });
-            doc.addImage(logoBase64, 'JPEG', 15, 8, 25, 12);
-        } catch (e) {
-            // Logo failed to load, continue without it
-        }
-        
         // Title - centered and bold
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
