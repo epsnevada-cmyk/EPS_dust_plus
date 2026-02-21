@@ -52,7 +52,7 @@ export default function Projects() {
           <h1 className="text-2xl font-bold text-stone-900">Projects</h1>
           <p className="text-sm text-stone-500 mt-1">Manage your dust control inspection jobs</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="bg-[var(--brand)] hover:bg-[var(--brand-light)] gap-2">
+        <Button onClick={() => setShowForm(true)} className="bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold gap-2">
           <Plus className="w-4 h-4" /> New Project
         </Button>
       </div>
@@ -78,7 +78,7 @@ export default function Projects() {
           <FolderOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-stone-600">No projects yet</h3>
           <p className="text-sm text-stone-400 mt-1">Create your first project to start inspections</p>
-          <Button onClick={() => setShowForm(true)} className="mt-4 bg-[var(--brand)] hover:bg-[var(--brand-light)] gap-2">
+          <Button onClick={() => setShowForm(true)} className="mt-4 bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold gap-2">
             <Plus className="w-4 h-4" /> Create Project
           </Button>
         </div>

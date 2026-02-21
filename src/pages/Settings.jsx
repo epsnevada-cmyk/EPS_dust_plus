@@ -122,7 +122,7 @@ export default function Settings() {
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[var(--brand)] hover:bg-[var(--brand-light)] gap-2"
+              className="bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold gap-2"
             >
               {saving ? (
                 <>Saving...</>

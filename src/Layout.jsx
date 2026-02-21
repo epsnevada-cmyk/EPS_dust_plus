@@ -18,24 +18,27 @@ export default function Layout({ children, currentPageName }) {
     <div className="min-h-screen bg-stone-50">
       <style>{`
         :root {
-          --brand: #1a3a2a;
-          --brand-light: #2d5a3f;
-          --accent: #d4a843;
-          --accent-light: #f0dea0;
+          --brand: #000000;
+          --brand-light: #1a1a1a;
+          --accent: #FD700;
+          --accent-light: #FFE066;
+          --yellow: #FD700;
         }
       `}</style>
 
       {/* Top Nav */}
-      <header className="bg-[var(--brand)] text-white sticky top-0 z-50 shadow-lg">
+      <header className="bg-black text-white sticky top-0 z-50 shadow-lg border-b-4 border-[#FD700]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to={createPageUrl("Dashboard")} className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[var(--accent)] flex items-center justify-center">
-                <ClipboardList className="w-5 h-5 text-[var(--brand)]" />
-              </div>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6998f3b35e48dacf2f6a83dc/def829a01_unnamed.jpg" 
+                alt="EPS Dust+ Logo" 
+                className="h-10 w-auto object-contain"
+              />
               <div>
-                <span className="text-lg font-bold tracking-tight">EPS Dust+</span>
-                <span className="hidden sm:inline text-xs text-stone-300 ml-2">Dust Control Inspector</span>
+                <span className="text-lg font-bold tracking-tight text-[#FD700]">EPS Dust+</span>
+                <span className="hidden sm:inline text-xs text-gray-400 ml-2">Dust Control Inspector</span>
               </div>
             </Link>
 
@@ -50,8 +53,8 @@ export default function Layout({ children, currentPageName }) {
                     to={createPageUrl(item.page)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-white/15 text-[var(--accent)]"
-                        : "text-stone-300 hover:text-white hover:bg-white/10"
+                        ? "bg-[#FD700] text-black"
+                        : "text-gray-300 hover:text-[#FD700] hover:bg-gray-900"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -65,7 +68,7 @@ export default function Layout({ children, currentPageName }) {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-white hover:bg-white/10"
+              className="md:hidden text-[#FD700] hover:bg-gray-900"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -75,7 +78,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Mobile Nav */}
         {menuOpen && (
-          <div className="md:hidden border-t border-white/10 pb-3 px-4">
+          <div className="md:hidden border-t border-[#FD700]/30 pb-3 px-4">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPageName === item.page;
@@ -86,8 +89,8 @@ export default function Layout({ children, currentPageName }) {
                   onClick={() => setMenuOpen(false)}
                   className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? "bg-white/15 text-[var(--accent)]"
-                      : "text-stone-300 hover:text-white"
+                      ? "bg-[#FD700] text-black"
+                      : "text-gray-300 hover:text-[#FD700]"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -99,7 +102,7 @@ export default function Layout({ children, currentPageName }) {
         )}
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-stone-50 min-h-screen">
         {children}
       </main>
     </div>

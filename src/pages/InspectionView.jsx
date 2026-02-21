@@ -66,7 +66,7 @@ export default function InspectionView() {
             <Printer className="w-4 h-4" /> Print
           </Button>
           <Link to={createPageUrl("DailyInspectionForm") + `?inspectionId=${inspection.id}`}>
-            <Button className="gap-2 text-sm bg-[var(--brand)] hover:bg-[var(--brand-light)]">
+            <Button className="gap-2 text-sm bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold">
               <Pencil className="w-4 h-4" /> Edit
             </Button>
           </Link>
@@ -76,7 +76,7 @@ export default function InspectionView() {
       {/* Header Info */}
       <Card className="mb-4 border-stone-200">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base text-[var(--brand)]">
+          <CardTitle className="text-base text-black">
             Dust Control Monitor Record of Daily Dust Control Inspections and Actions
           </CardTitle>
         </CardHeader>

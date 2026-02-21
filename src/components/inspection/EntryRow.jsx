@@ -19,7 +19,7 @@ export default function EntryRow({ entry, onChange, onDelete, index }) {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-[var(--brand)]">Entry #{index + 1}</span>
+        <span className="text-sm font-semibold text-black">Entry #{index + 1}</span>
         <Button variant="ghost" size="icon" className="text-stone-400 hover:text-red-500 h-8 w-8" onClick={() => onDelete(index)}>
           <Trash2 className="w-4 h-4" />
         </Button>

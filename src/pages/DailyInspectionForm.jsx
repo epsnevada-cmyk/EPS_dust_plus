@@ -252,7 +252,7 @@ export default function DailyInspectionForm() {
         <Link to={createPageUrl("Projects")}>
           <Button variant="outline" className="border-stone-300">Cancel</Button>
         </Link>
-        <Button onClick={handleSave} disabled={saving} className="bg-[var(--brand)] hover:bg-[var(--brand-light)] gap-2 px-8">
+        <Button onClick={handleSave} disabled={saving} className="bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold gap-2 px-8">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Inspection
         </Button>

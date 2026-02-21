@@ -11,12 +11,12 @@ export default function ProjectCard({ project, inspectionCount, onDelete, plansF
     <Card className="group hover:shadow-md transition-all duration-300 border-stone-200 overflow-hidden">
       <CardContent className="p-0">
         <div className="flex items-stretch">
-          <div className="w-1.5 bg-[var(--brand)] group-hover:bg-[var(--accent)] transition-colors" />
+          <div className="w-1.5 bg-black group-hover:bg-[#FD700] transition-colors" />
           <div className="flex-1 p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <FolderOpen className="w-4 h-4 text-[var(--brand)] shrink-0" />
+                  <FolderOpen className="w-4 h-4 text-black shrink-0" />
                   <h3 className="font-semibold text-stone-900 truncate">{project.project_name}</h3>
                 </div>
                 {project.dust_permit_number && (
@@ -38,7 +38,7 @@ export default function ProjectCard({ project, inspectionCount, onDelete, plansF
             </div>
             <div className="flex items-center gap-2 mt-4">
               <Link to={createPageUrl("DailyInspectionForm") + `?projectId=${project.id}`} className="flex-1">
-                <Button className="w-full bg-[var(--brand)] hover:bg-[var(--brand-light)] text-sm gap-2">
+                <Button className="w-full bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold text-sm gap-2">
                   <FileText className="w-4 h-4" />
                   New Inspection
                 </Button>
@@ -50,7 +50,7 @@ export default function ProjectCard({ project, inspectionCount, onDelete, plansF
               </Link>
               {plansFolderId && (
                 <a href={`https://drive.google.com/drive/folders/${plansFolderId}`} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="text-xs gap-1 border-[var(--accent)] text-[var(--brand)] hover:bg-[var(--accent-light)]">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 border-[#FD700] text-black hover:bg-[#FD700] hover:text-black">
                     <FileCheck className="w-3 h-3" />
                     Plans
                   </Button>

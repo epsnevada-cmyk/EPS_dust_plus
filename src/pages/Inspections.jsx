@@ -51,7 +51,7 @@ export default function Inspections() {
           <p className="text-sm text-stone-500 mt-1">Daily dust control inspection records</p>
         </div>
         <Link to={createPageUrl("DailyInspectionForm") + (filterProjectId !== "all" ? `?projectId=${filterProjectId}` : "")}>
-          <Button className="bg-[var(--brand)] hover:bg-[var(--brand-light)] gap-2">
+          <Button className="bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold gap-2">
             <Plus className="w-4 h-4" /> New Inspection
           </Button>
         </Link>
@@ -130,12 +130,12 @@ export default function Inspections() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Link to={createPageUrl("InspectionView") + `?id=${inspection.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-[var(--brand)]">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-black">
                         <Eye className="w-4 h-4" />
                       </Button>
                     </Link>
                     <Link to={createPageUrl("DailyInspectionForm") + `?inspectionId=${inspection.id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-[var(--brand)]">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-black">
                         <FileText className="w-4 h-4" />
                       </Button>
                     </Link>

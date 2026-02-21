@@ -35,13 +35,13 @@ export default function Dashboard() {
           icon={FolderOpen}
           label="Active Projects"
           value={loadingProjects ? "—" : activeProjects.length}
-          color="bg-emerald-500"
+          color="bg-[#FD700]"
         />
         <StatCard
           icon={ClipboardList}
           label="Total Inspections"
           value={loadingInspections ? "—" : inspections.length}
-          color="bg-[var(--brand)]"
+          color="bg-black"
         />
         <StatCard
           icon={Calendar}
@@ -53,37 +53,37 @@ export default function Dashboard() {
               ? format(new Date(inspections[0].date), "MMM d")
               : "—"
           }
-          color="bg-[var(--accent)]"
+          color="bg-[#FD700]"
         />
       </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Link to={createPageUrl("DailyInspectionForm")}>
-          <Card className="group cursor-pointer hover:shadow-md transition-all border-stone-200 hover:border-[var(--accent)]">
+          <Card className="group cursor-pointer hover:shadow-md transition-all border-stone-200 hover:border-[#FD700]">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[var(--brand)] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Plus className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-[#FD700] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Plus className="w-6 h-6 text-black" />
               </div>
               <div>
                 <h3 className="font-semibold text-stone-900">New Inspection</h3>
                 <p className="text-sm text-stone-500">Start a daily dust control record</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-stone-300 ml-auto group-hover:text-[var(--brand)] transition-colors" />
+              <ArrowRight className="w-5 h-5 text-stone-300 ml-auto group-hover:text-[#FD700] transition-colors" />
             </CardContent>
           </Card>
         </Link>
         <Link to={createPageUrl("Projects")}>
-          <Card className="group cursor-pointer hover:shadow-md transition-all border-stone-200 hover:border-[var(--accent)]">
+          <Card className="group cursor-pointer hover:shadow-md transition-all border-stone-200 hover:border-[#FD700]">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[var(--accent)] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <FolderOpen className="w-6 h-6 text-[var(--brand)]" />
+              <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center group-hover:scale-105 transition-transform">
+                <FolderOpen className="w-6 h-6 text-[#FD700]" />
               </div>
               <div>
                 <h3 className="font-semibold text-stone-900">Manage Projects</h3>
                 <p className="text-sm text-stone-500">View and create job projects</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-stone-300 ml-auto group-hover:text-[var(--brand)] transition-colors" />
+              <ArrowRight className="w-5 h-5 text-stone-300 ml-auto group-hover:text-black transition-colors" />
             </CardContent>
           </Card>
         </Link>
@@ -111,8 +111,8 @@ export default function Dashboard() {
               {inspections.slice(0, 5).map((insp) => (
                 <Link key={insp.id} to={createPageUrl("InspectionView") + `?id=${insp.id}`}>
                   <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-stone-50 transition-colors group">
-                    <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-[var(--brand)]" />
+                    <div className="w-8 h-8 rounded-lg bg-[#FD700]/20 flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4 text-black" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-stone-800 truncate">{insp.project_name || "—"}</p>

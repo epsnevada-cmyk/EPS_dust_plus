@@ -34,7 +34,7 @@ export default function ProjectFormDialog({ open, onOpenChange, onSubmit }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-[var(--brand)]">New Project</DialogTitle>
+          <DialogTitle className="text-black">New Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div className="space-y-2">
@@ -89,7 +89,7 @@ export default function ProjectFormDialog({ open, onOpenChange, onSubmit }) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving} className="bg-[var(--brand)] hover:bg-[var(--brand-light)]">
+            <Button type="submit" disabled={saving} className="bg-[#FD700] hover:bg-[#FFB700] text-black font-semibold">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Create Project
             </Button>
