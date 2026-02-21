@@ -115,8 +115,8 @@ Deno.serve(async (req) => {
         doc.setFont(undefined, 'normal');
         y = tableY + 10;
 
-        const rowHeight = 12;
-        const maxRows = 14; // Space for about 14 rows
+        const rowHeight = 18;
+        const maxRows = 11; // Space for about 11 rows with taller height
 
         for (let i = 0; i < Math.max(entries.length, maxRows); i++) {
             const entry = entries[i] || {};
