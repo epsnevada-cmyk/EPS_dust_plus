@@ -38,21 +38,40 @@ export default function Settings() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Extract just the folder ID if user pasted a URL
+      let cleanFolderId = folderId;
+      if (cleanFolderId.includes('drive.google.com')) {
+        const match = cleanFolderId.match(/folders\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+          cleanFolderId = match[1];
+        }
+      }
+      cleanFolderId = cleanFolderId.split('?')[0];
+
+      let cleanPlansFolderId = plansFolderId;
+      if (cleanPlansFolderId.includes('drive.google.com')) {
+        const match = cleanPlansFolderId.match(/folders\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+          cleanPlansFolderId = match[1];
+        }
+      }
+      cleanPlansFolderId = cleanPlansFolderId.split('?')[0];
+
       if (settings[0]) {
         await base44.entities.AppSettings.update(settings[0].id, {
-          google_drive_folder_id: folderId,
-          plans_permits_folder_id: plansFolderId,
+          google_drive_folder_id: cleanFolderId,
+          plans_permits_folder_id: cleanPlansFolderId,
           setting_key: "app_settings",
         });
       } else {
         await base44.entities.AppSettings.create({
-          google_drive_folder_id: folderId,
-          plans_permits_folder_id: plansFolderId,
+          google_drive_folder_id: cleanFolderId,
+          plans_permits_folder_id: cleanPlansFolderId,
           setting_key: "app_settings",
         });
       }
       queryClient.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("Settings saved!");
+      toast.success("Settings saved! Folder IDs cleaned and ready to use.");
     } catch (error) {
       toast.error("Failed to save settings");
     }
