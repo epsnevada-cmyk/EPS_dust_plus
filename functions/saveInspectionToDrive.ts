@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
         doc.text(`Date: ${inspection.date || '_______________'}`, rightCol, y);
         
         y += 8;
-        doc.text(`Dust Permit Number: ${inspection.dust_permit_number || '_______________'}`, leftCol, y);
+        doc.text(`Dust Permit Number: ${inspection.dust_permit_number || project?.dust_permit_number || '_______________'}`, leftCol, y);
         doc.text(`Completed By: ${inspection.completed_by || '___________________________'}`, rightCol, y);
 
         y += 10;
