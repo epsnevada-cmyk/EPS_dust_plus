@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
         const accessToken = await base44.asServiceRole.connectors.getAccessToken('googledrive');
 
         // Upload to Google Drive
-        const fileName = `Inspection_${inspection.project_name?.replace(/[^a-zA-Z0-9]/g, '_') || 'Unnamed'}_${inspection.date || 'NoDate'}.pdf`;
+        const fileName = `${inspection.project_name?.replace(/[^a-zA-Z0-9]/g, '_') || 'Unnamed'}_Dust_Inspection_${inspection.date || 'NoDate'}.pdf`;
         
         const metadata = {
             name: fileName,
