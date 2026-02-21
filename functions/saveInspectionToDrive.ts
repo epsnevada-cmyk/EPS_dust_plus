@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
             let maxLines = 1;
             const wrappedCells = values.map((val, idx) => {
                 if (!val) return [];
-                const lines = doc.splitTextToSize(val, colWidths[idx] - 4);
+                const lines = doc.splitTextToSize(val.toString(), colWidths[idx] - 4);
                 maxLines = Math.max(maxLines, lines.length);
                 return lines;
             });
@@ -164,19 +164,30 @@ Deno.serve(async (req) => {
             // Draw row borders
             doc.rect(tableX, y, tableWidth, rowHeight);
             
-            // Draw cell content
-            xPos = tableX + 2;
+            // Draw cell content with clipping
+            xPos = tableX;
             
             wrappedCells.forEach((lines, idx) => {
+                // Save graphics state
+                doc.saveGraphicsState();
+                
+                // Create clipping rectangle for this cell
+                doc.rect(xPos, y, colWidths[idx], rowHeight);
+                doc.clip();
+                
                 if (lines.length > 0) {
                     let lineY = y + 4;
                     lines.forEach((line) => {
-                        doc.text(line, xPos + 2, lineY);
+                        doc.text(line, xPos + 2, lineY, { maxWidth: colWidths[idx] - 4 });
                         lineY += lineHeight;
                     });
                 }
+                
+                // Restore graphics state
+                doc.restoreGraphicsState();
+                
                 // Draw vertical lines
-                doc.line(xPos - 2, y, xPos - 2, y + rowHeight);
+                doc.line(xPos, y, xPos, y + rowHeight);
                 xPos += colWidths[idx];
             });
             doc.line(tableX + tableWidth, y, tableX + tableWidth, y + rowHeight);
