@@ -42,7 +42,7 @@ export default function DailyHeader({ form, setForm }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label>Dust Sign Posted</Label>
           <Select value={form.dust_sign_posted || ""} onValueChange={(v) => setForm({ ...form, dust_sign_posted: v })}>
@@ -74,19 +74,36 @@ export default function DailyHeader({ form, setForm }) {
         <div className="space-y-2">
           <Label>Soil Import/Export Trucks Running</Label>
           <Select
-            value={form.soil_import_export_trucks_running?.toString() || ""}
-            onValueChange={(v) => setForm({ ...form, soil_import_export_trucks_running: parseInt(v) })}
+            value={form.trucks_running || ""}
+            onValueChange={(v) => setForm({ ...form, trucks_running: v, trucks_running_count: v === "No" ? null : form.trucks_running_count })}
           >
             <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select #..." />
+              <SelectValue placeholder="Select..." />
             </SelectTrigger>
             <SelectContent>
-              {truckOptions.map((n) => (
-                <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
-              ))}
+              <SelectItem value="Yes">Yes</SelectItem>
+              <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        {form.trucks_running === "Yes" && (
+          <div className="space-y-2">
+            <Label>Number of Trucks</Label>
+            <Select
+              value={form.trucks_running_count?.toString() || ""}
+              onValueChange={(v) => setForm({ ...form, trucks_running_count: parseInt(v) })}
+            >
+              <SelectTrigger className="bg-white">
+                <SelectValue placeholder="Select #..." />
+              </SelectTrigger>
+              <SelectContent>
+                {truckOptions.map((n) => (
+                  <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
     </div>
   );

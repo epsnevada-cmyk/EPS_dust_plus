@@ -82,7 +82,8 @@ Deno.serve(async (req) => {
 
         doc.text(`Permit Onsite: ${inspection.dust_permit_on_site || 'Yes'}`, 20, y + 7);
         doc.text(`Sign Posted: ${inspection.dust_sign_posted || 'Yes'}`, 20, y + 13);
-        doc.text(`Trucks Running: ${inspection.soil_import_export_trucks_running || '9'}`, 90, y + 7);
+        const trucksText = inspection.trucks_running === 'Yes' ? `Yes (${inspection.trucks_running_count || 0})` : inspection.trucks_running || 'No';
+        doc.text(`Trucks Running: ${trucksText}`, 90, y + 7);
         doc.text(`Project: ${inspection.project_name || 'N/A'}`, 90, y + 13);
 
         y += 25; // Compacted spacing before table
@@ -232,7 +233,7 @@ Deno.serve(async (req) => {
                         <ul>
                             <li>Dust Sign Posted: ${inspection.dust_sign_posted || 'N/A'}</li>
                             <li>Dust Permit On Site: ${inspection.dust_permit_on_site || 'N/A'}</li>
-                            <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
+                            <li>Trucks Running: ${inspection.trucks_running === 'Yes' ? `Yes (${inspection.trucks_running_count || 0} trucks)` : inspection.trucks_running || 'N/A'}</li>
                             <li>Inspection Entries: ${entries.length}</li>
                         </ul>
                         <p>Please see the attached PDF for the complete inspection report.</p>

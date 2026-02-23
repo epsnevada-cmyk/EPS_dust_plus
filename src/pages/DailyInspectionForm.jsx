@@ -24,7 +24,8 @@ export default function DailyInspectionForm() {
     completed_by: "",
     dust_sign_posted: "",
     dust_permit_on_site: "",
-    soil_import_export_trucks_running: null,
+    trucks_running: "",
+    trucks_running_count: null,
   });
   const [entries, setEntries] = useState([createBlankEntry()]);
   const [saving, setSaving] = useState(false);
@@ -56,7 +57,8 @@ export default function DailyInspectionForm() {
         completed_by: insp.completed_by || "",
         dust_sign_posted: insp.dust_sign_posted || "",
         dust_permit_on_site: insp.dust_permit_on_site || "",
-        soil_import_export_trucks_running: insp.soil_import_export_trucks_running,
+        trucks_running: insp.trucks_running || "",
+        trucks_running_count: insp.trucks_running_count,
       });
     }
   }, [existingInspection]);
