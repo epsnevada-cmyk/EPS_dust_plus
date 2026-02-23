@@ -265,7 +265,7 @@ Deno.serve(async (req) => {
                         <ul>
                             <li>Dust Sign Posted: ${inspection.dust_sign_posted || 'N/A'}</li>
                             <li>Dust Permit On Site: ${inspection.dust_permit_on_site || 'N/A'}</li>
-                            <li>Trucks Running: ${inspection.soil_import_export_trucks_running || 'N/A'}</li>
+                            <li>Trucks Running: ${inspection.trucks_running === 'Yes' ? `Yes (${inspection.trucks_running_count || 0} trucks)` : inspection.trucks_running || 'N/A'}</li>
                             <li>Total Entries: ${entries.length}</li>
                         </ul>
                         <p>Please see the attached PDF for your complete inspection report.</p>
